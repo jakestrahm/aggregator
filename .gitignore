@@ -1,0 +1,24 @@
+# dependencies
+node_modules
+
+# environment
+.env*
+
+# build
+dist
+build
+
+# typescript
+*.tsbuildinfo
+
+# system
+.ds_store
+
+# editor
+.vscode
+
+# logs
+npm-debug.log*
+
+# docker
+docker-compose.override.yml
