@@ -15,68 +15,56 @@ import RemoveUser from "../components/Users/RemoveUser";
 import FindUser from "../components/Users/FindUser";
 import Search from "../components/Search";
 
-
 export default function Dashboard() {
 	const dispatch = useDispatch();
-	const profilingStatus = useSelector(selectProfilingStatus)
-	const profile = useSelector(selectProfilingData)
+	const profilingStatus = useSelector(selectProfilingStatus);
+	const profile = useSelector(selectProfilingData);
 	const [data, setData] = useState({});
 	const [activeForm, setActiveForm] = useState('');
+	const [searchText, setSearchText] = useState("");
 
-	const buttons = ['Register User', 'Edit User', 'Remove User', 'Find User', 'Get All Users'];
+	const buttons = ['Register User', 'Edit User', 'Remove User', 'Find User', 'Select All Users'];
 
+	const filteredButtons = buttons.filter(button =>
+		button.toLowerCase().includes(searchText.toLowerCase())
+	);
 
 	function handleClick(formName: string) {
-		setActiveForm(formName)
+		setActiveForm(formName);
 	}
 
 	function renderForm() {
 		switch (activeForm) {
 			case 'Register User':
-				return (
-					<RegisterUser setData={setData} />
-				)
+				return <RegisterUser setData={setData} />;
 			case 'Edit User':
-				return (
-					<EditUser setData={setData} />
-				)
+				return <EditUser setData={setData} />;
 			case 'Remove User':
-				return (
-					<RemoveUser setData={setData} />
-				)
+				return <RemoveUser setData={setData} />;
 			case 'Find User':
-				return (
-					<FindUser setData={setData} />
-				)
+				return <FindUser setData={setData} />;
 			default:
 				return null;
-
-
-
 		}
 	}
 
 	useEffect(() => {
-		dispatch(enableProfiling())
-
+		dispatch(enableProfiling());
 		return () => {
-			dispatch(disableProfiling())
-		}
-	}, [])
+			dispatch(disableProfiling());
+		};
+	}, [dispatch]);
 
 	return (
 		<div>
-			<Search />
+			<Search setValue={setSearchText} value={searchText} />
 			<Stack spacing={2} direction="column">
-				{[
-					'Register User',
-					'Edit User',
-					'Remove User',
-					'Find User',
-					'Get All Users'
-				].map((label) => (
+				{filteredButtons.map((label) => (
 					<div key={label}>
-						<Button variant='outlined' onClick={() => handleClick(label)} key={label} >
+						<Button
+							variant='outlined'
+							onClick={() => handleClick(label)}
+						>
 							{label}
 						</Button>
 					</div>
@@ -86,6 +74,6 @@ export default function Dashboard() {
 			<pre>{JSON.stringify(data, null, 4)}</pre>
 			profilingStatus: {profilingStatus} <br />
 			{profile != null && <FlameGraph profile={profile} />}
-		</div >
+		</div>
 	);
 }
