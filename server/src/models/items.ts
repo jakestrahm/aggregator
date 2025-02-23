@@ -5,49 +5,56 @@ import { DbError, DbErrorType } from '../utilities/DbError';
 const syncProperties = async (category: string, newProperties: Record<string, any>) => {
 	try {
 		const existingCategoryItem = await sql`
-		select properties
-		from items
-		where category = ${category}
-		limit 1 `
+            select properties
+            from items
+            where category = ${category}
+            limit 1`;
 
 		if (existingCategoryItem.length == 0) {
-			console.log(`no preexisting items of category ${category}`)
+			console.log(`no preexisting items of category ${category}`);
 			return;
 		}
 
-		const existingKeys = Object.keys(existingCategoryItem[0].properties);
-		const newKeys = Object.keys(newProperties);
+		// Handle the case where properties is an array
+		const existingProps = Array.isArray(existingCategoryItem[0].properties)
+			? JSON.parse(existingCategoryItem[0].properties[0])
+			: existingCategoryItem[0].properties;
 
-		// find new properties to add
+		const existingKeys = Object.keys(existingProps);
+		const newKeys = Object.keys(newProperties);
 		const newlyAddedKeys = newKeys.filter(key => !existingKeys.includes(key));
-		// find old properties to remove
 		const keysToRemove = existingKeys.filter(key => !newKeys.includes(key));
 
 		if (newlyAddedKeys.length > 0 || keysToRemove.length > 0) {
-			// for new properties, create object with null values
 			const nullProps = newlyAddedKeys.reduce((acc, key) => {
 				acc[key] = null;
 				return acc;
 			}, {} as Record<string, any>);
 
 			const propertySync = await sql`
-				UPDATE items
-				SET properties = (properties || ${JSON.stringify(nullProps)}::jsonb) - ${keysToRemove}
-				WHERE category = ${category}
-				returning properties
-				limit 1`
+                UPDATE items
+                SET properties = COALESCE(
+                    CASE
+                        WHEN jsonb_typeof(properties) = 'array'
+                        THEN (properties->0)::jsonb
+                        ELSE properties
+                    END || ${sql.json(nullProps)}::jsonb - ${sql.array(keysToRemove)}::text[],
+                    ${sql.json(nullProps)}::jsonb
+                )
+                WHERE category = ${category}
+                RETURNING properties`;
 
 			if (propertySync.length == 0) {
-				throw new DbError(`failed to sync properties across category type`, DbErrorType.DataIntegrityViolation)
+				throw new DbError(`failed to sync properties across category type`, DbErrorType.DataIntegrityViolation);
 			}
 		}
 
 		return newProperties;
 	} catch (err) {
-		console.error(err)
+		console.error(err);
 		throw err;
 	}
-}
+};
 
 const selectItemById = async (id: number) => {
 	try {
@@ -108,13 +115,15 @@ const deleteItemById = async (id: number) => {
 const insertItem = async (itemInsert: ItemInsert) => {
 	try {
 		let { name, category, properties } = itemInsert;
-
-
 		const item = await sql`
-		insert into items (name, category, properties)
-		values (${name}, ${category}, ${JSON.stringify(properties)})
-		returning *
-		`;
+            insert into items (name, category, properties)
+            values (
+                ${name},
+                ${category},
+                ${sql.json(properties)}::jsonb
+            )
+            returning *
+        `;
 
 		if (item.length == 0) {
 			throw new DbError(`item insert failed`, DbErrorType.ServerError)
@@ -132,19 +141,16 @@ const insertItem = async (itemInsert: ItemInsert) => {
 const updateItemById = async (id: number, itemUpdate: ItemUpdate) => {
 	try {
 		const currentItem = await selectItemById(id);
+		const updates = Object.entries(itemUpdate).reduce((acc, [key, value]) => {
+			acc[key] = value;  // Remove the JSON.stringify
+			return acc;
+		}, {} as Record<string, any>);
 
 		const updateResult = await sql`
             UPDATE items
-            SET ${sql(
-			Object.entries(itemUpdate)
-				.map(([key, value]) =>
-					`${key} = ${value instanceof Object ? JSON.stringify(value) : value}`
-				)
-				.join(', ')
-		)}
+            SET ${sql(updates)}
             WHERE id = ${id}
-            RETURNING *
-        `;
+            RETURNING *`;
 
 		if (updateResult.length === 0) {
 			throw new DbError(`updating item of id: ${id} failed`, DbErrorType.ServerError);
@@ -160,5 +166,6 @@ const updateItemById = async (id: number, itemUpdate: ItemUpdate) => {
 		throw err;
 	}
 };
+
 
 export { selectItemById, selectItems, deleteItemById, insertItem, updateItemById }

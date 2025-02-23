@@ -3,9 +3,9 @@ import {
 	register,
 	login,
 	// logout,
-	deleteUser,
-	updateUser,
-	getUser,
+	removeUser,
+	editUser,
+	findUser,
 	listUsers,
 } from '../handlers/users';
 //import { protect } from '../middleware/auth';
@@ -30,8 +30,8 @@ router
 
 router
 	.route('/:id')
-	.get(getUser)
-	.put(updateUser) //TODO need to protect
-	.delete(deleteUser) //TODO need to protect
+	.get(findUser)
+	.put(editUser) //TODO need to protect
+	.delete(removeUser) //TODO need to protect
 
 export { router };

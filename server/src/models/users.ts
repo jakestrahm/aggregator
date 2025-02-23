@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { sql } from '../db/db';
-import { UserAuthenticate, UserInsert, UserUpdate } from '../types';
+import { UserAuthenticate, UserInsert, UserSelect, UserUpdate } from '../types';
 import { DbError, DbErrorType } from '../utilities/DbError';
 dotenv.config()
 
@@ -25,7 +25,7 @@ const selectUserById = async (id: number) => {
 			throw new DbError(`user of id: ${id} not found`, DbErrorType.MissingRecord)
 		}
 
-		return user;
+		return user[0] as UserSelect;
 	} catch (err) {
 		console.error(err);
 		throw err;

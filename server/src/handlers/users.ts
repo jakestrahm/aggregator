@@ -19,7 +19,7 @@ const listUsers = asyncHandler(async (_: Request, res: Response) => {
 	res.json(result);
 });
 
-const getUser = asyncHandler(async (req: Request, res: Response) => {
+const findUser = asyncHandler(async (req: Request, res: Response) => {
 	let id: number = parseInt(req.params.id)
 
 	if (!id) {
@@ -31,7 +31,7 @@ const getUser = asyncHandler(async (req: Request, res: Response) => {
 	res.json(result)
 });
 
-const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+const removeUser = asyncHandler(async (req: Request, res: Response) => {
 	let id: number = parseInt(req.params.id)
 
 	if (!id) {
@@ -43,7 +43,7 @@ const deleteUser = asyncHandler(async (req: Request, res: Response) => {
 	res.json(result)
 });
 
-const updateUser = asyncHandler(async (req: Request, res: Response) => {
+const editUser = asyncHandler(async (req: Request, res: Response) => {
 	const update: UserUpdate = {}
 	const email: string = req.body?.email
 	const username: string = req.body?.username
@@ -155,4 +155,4 @@ const login = asyncHandler(async (req: Request, res: Response) => {
 //
 // });
 
-export { listUsers, getUser, deleteUser, updateUser, register, login, /*Logout*/ }
+export { listUsers, findUser, removeUser, editUser, register, login, /*Logout*/ }

@@ -50,19 +50,23 @@ const editItem = asyncHandler(async (req: Request, res: Response) => {
 	if (name) {
 		update.name = name
 	} else {
-		throw new ResponseError(`invalid name`, 400)
+		// throw new ResponseError(`invalid name`, 400)
 	}
 
 	if (category) {
 		update.category = category
 	} else {
-		throw new ResponseError(`invalid category`, 400)
+		// throw new ResponseError(`invalid category`, 400)
 	}
 
 	if (properties) {
 		update.properties = properties
 	} else {
-		throw new ResponseError(`invalid properties`, 400)
+		// throw new ResponseError(`invalid properties`, 400)
+	}
+
+	if (!name && !category && !properties) {
+		throw new ResponseError('No fields to update', 400)
 	}
 
 	const result = await updateItemById(parseInt(req.params.id), update)
