@@ -1,7 +1,6 @@
 import { useRef } from "react";
 
 export default function Search({ setValue, value }: any) {
-	const options = ['Register User', 'Edit User', 'Remove User', 'Find User', 'Get All Users'];
 	const timeoutRef = useRef(0);
 
 	const handleChange = (event: any) => {
@@ -16,14 +15,7 @@ export default function Search({ setValue, value }: any) {
 
 	return (
 		<>
-			<input
-				onChange={handleChange}
-				type="text"
-			/>
-
-			<pre>
-				{JSON.stringify(value, null, 4)}
-			</pre>
+			<input onChange={handleChange} type="text" />
 		</>
 	)
 
