@@ -1,7 +1,7 @@
-//users
+// users
 type UserUpdate = {
-	email?: string,
-	username?: string,
+	email?: string
+	username?: string
 	password?: string
 }
 
@@ -12,69 +12,86 @@ type UserInsert = {
 }
 
 type UserAuthenticate = {
-	email?: string,
+	email?: string
 	username?: string
 	password: string
 }
 
 type UserSelect = {
-	id: number,
-	email: string,
-	username: string,
+	id: number
+	email: string
+	username: string
 	created_at: string
 }
 
 // items
 type ItemUpdate = {
-	name?: string,
-	category?: string,
-	properties?: Record<string, any>
+	name?: string
+	item_type?: string
+	properties?: { property_name: string; property_value: string }[];
 }
 
 type ItemInsert = {
-	name: string,
-	category: string,
-	properties: Record<string, any>
-}
+	name: string;
+	item_type: string;
+	properties?: { property_name: string; property_value: string }[];
+};
 
 type ItemSelect = {
-	id: number,
-	name: string,
-	category: string,
-	properties: Record<string, any>
+	id: number;
+	name: string;
+	item_type: string;
+	properties?: { property_name: string; property_value: string }[];
+};
+
+// item properties
+type ItemPropertyInsert = {
+	item_id: number
+	property_name: string
+	property_value: string
 }
 
-// groups
-type GroupUpdate = {
-	name?: string,
+type ItemPropertySelect = {
+	item_id: number
+	property_name: string
+	property_value: string
+}
+
+type ItemPropertyUpdate = {
+	property_value?: string
+}
+
+// collections
+type CollectionUpdate = {
+	name?: string
 	description?: string
 }
 
-type GroupInsert = {
+type CollectionInsert = {
+	name: string
+	description?: string | null
+}
+
+type CollectionSelect = {
+	id: number
 	name: string
 	description: string | null
 }
 
-type GroupSelect = {
-	id: number,
-	name: string,
-	description: string | null
+// collection items
+type CollectionItemUpdate = {
+	quantity?: number
 }
 
-// group items
-type GroupItemUpdate = {
-	quantity: number
-}
-
-type GroupItemInsert = {
-	group_id: number
+type CollectionItemInsert = {
+	collection_id: number
 	item_id: number
-	quantity: number
+	quantity?: number
 }
 
-type GroupItemSelect = {
-	group_id: number,
-	item_id: number,
+type CollectionItemSelect = {
+	collection_id: number
+	item_id: number
 	quantity: number
 }
 
@@ -86,10 +103,13 @@ export {
 	ItemUpdate,
 	ItemInsert,
 	ItemSelect,
-	GroupUpdate,
-	GroupInsert,
-	GroupSelect,
-	GroupItemUpdate,
-	GroupItemInsert,
-	GroupItemSelect,
+	ItemPropertyInsert,
+	ItemPropertySelect,
+	ItemPropertyUpdate,
+	CollectionUpdate,
+	CollectionInsert,
+	CollectionSelect,
+	CollectionItemUpdate,
+	CollectionItemInsert,
+	CollectionItemSelect,
 }

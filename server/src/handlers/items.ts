@@ -41,36 +41,32 @@ const removeItem = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const editItem = asyncHandler(async (req: Request, res: Response) => {
-	const update: ItemUpdate = {}
-	const name: string = req.body?.name
-	const category: string = req.body?.category
-	const properties: Record<string, any> = req.body?.properties
+	const update: ItemUpdate = {};
+	const { name, item_type, ...propertyFields } = req.body;
 
-	//todo actually implement checks
+	// Handle direct fields
 	if (name) {
-		update.name = name
-	} else {
-		// throw new ResponseError(`invalid name`, 400)
+		update.name = name;
+	}
+	if (item_type) {
+		update.item_type = item_type;
 	}
 
-	if (category) {
-		update.category = category
-	} else {
-		// throw new ResponseError(`invalid category`, 400)
+	// Handle properties - now we use propertyFields directly
+	if (Object.keys(propertyFields).length > 0) {
+		// Each field in propertyFields becomes a property
+		update.properties = Object.entries(propertyFields).map(([name, value]) => ({
+			property_name: name,
+			property_value: String(value)
+		}));
 	}
 
-	if (properties) {
-		update.properties = properties
-	} else {
-		// throw new ResponseError(`invalid properties`, 400)
+	if (!name && !item_type && !update.properties?.length) {
+		throw new ResponseError('no fields to update', 400);
 	}
 
-	if (!name && !category && !properties) {
-		throw new ResponseError('No fields to update', 400)
-	}
-
-	const result = await updateItemById(parseInt(req.params.id), update)
-	console.log(result)
+	const result = await updateItemById(parseInt(req.params.id), update);
+	console.log(result);
 	res.json(result);
 });
 
@@ -90,7 +86,7 @@ const createItem = asyncHandler(async (req: Request, res: Response) => {
 
 	let newItem: ItemInsert = {
 		name: req.body.name,
-		category: req.body.category,
+		item_type: req.body.item_type,
 		properties: req.body.properties
 	}
 

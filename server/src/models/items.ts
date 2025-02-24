@@ -2,165 +2,175 @@ import { sql } from '../db/db';
 import { ItemInsert, ItemSelect, ItemUpdate } from '../types';
 import { DbError, DbErrorType } from '../utilities/DbError';
 
-const syncProperties = async (category: string, newProperties: Record<string, any>) => {
+const selectItemById = async (id: number) => {
 	try {
-		const existingCategoryItem = await sql`
-            select properties
-            from items
-            where category = ${category}
-            limit 1`;
+		const items = await sql`
+      select
+        i.id as item_id,
+        i.name,
+        i.item_type,
+        coalesce(jsonb_object_agg(ip.property_name, ip.property_value)
+          filter (where ip.property_name is not null), '{}'::jsonb) as properties
+      from items i
+      left join item_properties ip on i.id = ip.item_id
+      where i.id = ${id}
+      group by i.id;
+    `;
 
-		if (existingCategoryItem.length == 0) {
-			console.log(`no preexisting items of category ${category}`);
-			return;
+		if (items.length === 0) {
+			throw new DbError(`item of id: ${id} not found`, DbErrorType.MissingRecord);
 		}
 
-		// Handle the case where properties is an array
-		const existingProps = Array.isArray(existingCategoryItem[0].properties)
-			? JSON.parse(existingCategoryItem[0].properties[0])
-			: existingCategoryItem[0].properties;
+		const { properties, ...item } = items[0];
 
-		const existingKeys = Object.keys(existingProps);
-		const newKeys = Object.keys(newProperties);
-		const newlyAddedKeys = newKeys.filter(key => !existingKeys.includes(key));
-		const keysToRemove = existingKeys.filter(key => !newKeys.includes(key));
-
-		if (newlyAddedKeys.length > 0 || keysToRemove.length > 0) {
-			const nullProps = newlyAddedKeys.reduce((acc, key) => {
-				acc[key] = null;
-				return acc;
-			}, {} as Record<string, any>);
-
-			const propertySync = await sql`
-                UPDATE items
-                SET properties = COALESCE(
-                    CASE
-                        WHEN jsonb_typeof(properties) = 'array'
-                        THEN (properties->0)::jsonb
-                        ELSE properties
-                    END || ${sql.json(nullProps)}::jsonb - ${sql.array(keysToRemove)}::text[],
-                    ${sql.json(nullProps)}::jsonb
-                )
-                WHERE category = ${category}
-                RETURNING properties`;
-
-			if (propertySync.length == 0) {
-				throw new DbError(`failed to sync properties across category type`, DbErrorType.DataIntegrityViolation);
-			}
-		}
-
-		return newProperties;
+		return {
+			...item,
+			...properties
+		};
 	} catch (err) {
 		console.error(err);
 		throw err;
 	}
 };
 
-const selectItemById = async (id: number) => {
-	try {
-		const item = await sql`
-		select *
-		from items
-		where id = ${id}
-		`;
-
-		if (item.length == 0) {
-			throw new DbError(`item of id: ${id} not found`, DbErrorType.MissingRecord)
-		}
-
-		return item[0] as ItemSelect;
-	} catch (err) {
-		console.error(err);
-		throw err;
-	}
-}
-
 const selectItems = async () => {
 	try {
 		const items = await sql`
-		select *
-		from items
-		order by id
-		`;
+      select
+        i.id as item_id,
+        i.name,
+        i.item_type,
+        coalesce(jsonb_object_agg(ip.property_name, ip.property_value)
+          filter (where ip.property_name is not null), '{}'::jsonb) as properties
+      from items i
+      left join item_properties ip on i.id = ip.item_id
+      group by i.id
+      order by i.id;
+    `;
 
-		return items
+		return items.map(({ properties, ...item }) => ({
+			...item,
+			...properties
+		}));
 	} catch (err) {
 		console.error(err);
 		throw err;
 	}
-}
+};
 
 const deleteItemById = async (id: number) => {
 	try {
-		await selectItemById(id);
+		// check if the item exists before attempting to delete
+		const item = await selectItemById(id);
 
-		const item = await sql`
-		delete from items
-		where id = ${id}
-		returning *;
-		`;
+		// delete the item
+		const deletedItem = await sql`
+      delete from items
+      where id = ${id}
+      returning *;
+    `;
 
-		if (item.length == 0) {
-			console.log(item)
-			throw new DbError(`deletion of item with if ${id} failed`, DbErrorType.ServerError)
+		if (deletedItem.length === 0) {
+			throw new DbError(`deletion of item with id ${id} failed`, DbErrorType.ServerError);
 		}
 
-		return item;
+		return { ...item }; // return the original item with its properties
 	} catch (err) {
 		console.error(err);
 		throw err;
 	}
-}
+};
 
 const insertItem = async (itemInsert: ItemInsert) => {
+	const { name, item_type, properties = [] } = itemInsert; // ensure properties is an array
+
 	try {
-		let { name, category, properties } = itemInsert;
-		const item = await sql`
-            insert into items (name, category, properties)
-            values (
-                ${name},
-                ${category},
-                ${sql.json(properties)}::jsonb
-            )
-            returning *
-        `;
+		return await sql.begin(async (sql) => {
+			const insertedItem = await sql`
+				insert into items (name, item_type)
+				values (${name}, ${item_type})
+				returning id;`;
 
-		if (item.length == 0) {
-			throw new DbError(`item insert failed`, DbErrorType.ServerError)
-		}
+			if (insertedItem.length === 0) {
+				throw new DbError(`failed to insert item`, DbErrorType.ServerError);
+			}
 
-		await syncProperties(category, properties);
+			const itemId = insertedItem[0].id;
 
-		return item;
+			if (Array.isArray(properties) && properties.length > 0) {
+				const propertyTuples = properties.map(({ property_name, property_value }) => [
+					itemId,
+					property_name,
+					property_value,
+				]);
+
+				await sql`
+				  insert into item_properties (item_id, property_name, property_value)
+				  values ${sql(propertyTuples)};
+				`;
+			}
+
+			return itemId;
+		});
+
 	} catch (err) {
 		console.error(err);
 		throw err;
 	}
-}
+};
+//todo return itemselects?
 
 const updateItemById = async (id: number, itemUpdate: ItemUpdate) => {
 	try {
-		const currentItem = await selectItemById(id);
-		const updates = Object.entries(itemUpdate).reduce((acc, [key, value]) => {
-			acc[key] = value;  // Remove the JSON.stringify
-			return acc;
-		}, {} as Record<string, any>);
-
-		const updateResult = await sql`
-            UPDATE items
-            SET ${sql(updates)}
-            WHERE id = ${id}
-            RETURNING *`;
-
-		if (updateResult.length === 0) {
-			throw new DbError(`updating item of id: ${id} failed`, DbErrorType.ServerError);
+		const existingItem = await selectItemById(id);
+		if (existingItem.length == 0) {
+			throw new DbError(`item of id: ${id} not found`, DbErrorType.MissingRecord);
 		}
+		const {
+			name = existingItem.name,
+			item_type = existingItem.item_type,
+			properties = existingItem.properties,
+		} = itemUpdate;
 
-		if (itemUpdate.properties) {
-			await syncProperties(currentItem.category, itemUpdate.properties);
-		}
+		return await sql.begin(async (sql) => {
 
-		return updateResult[0];
+			const updatedItem = await sql`
+				update items
+				set
+					name = ${name},
+					item_type = ${item_type}
+					returning id;`
+
+			if (updatedItem.length == 0) {
+				throw new DbError(`update of item with id ${id} failed`, DbErrorType.ServerError)
+			}
+
+
+			if (Array.isArray(properties)) {
+				// clear out old item_properties
+				await sql`
+                    DELETE FROM item_properties
+                    WHERE item_id = ${id};
+                `;
+
+				//insert new set
+				if (properties.length > 0) {
+					const propertyTuples = properties.map(({ property_name, property_value }) => [
+						id,
+						property_name,
+						property_value,
+					]);
+
+					await sql`
+                        INSERT INTO item_properties (item_id, property_name, property_value)
+                        VALUES ${sql(propertyTuples)};
+                    `;
+				}
+			}
+
+			return id;
+		});
+
 	} catch (err) {
 		console.error(err);
 		throw err;
