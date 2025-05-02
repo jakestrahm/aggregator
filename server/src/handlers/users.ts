@@ -136,7 +136,6 @@ const login = asyncHandler(async (req: Request, res: Response) => {
 		...(username && { username }),
 	}
 
-	// move to jwt, no session
 	let token = await createToken(LoginInfo);
 	console.log(token)
 	res.json(token)

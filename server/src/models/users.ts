@@ -96,7 +96,7 @@ const insertUser = async (userInsert: UserInsert) => {
 
 const updateUserById = async (id: number, userUpdate: UserUpdate) => {
 	try {
-		let { username, email } = userUpdate;
+		const { username, email } = userUpdate;
 
 		let setStatement = ``;
 

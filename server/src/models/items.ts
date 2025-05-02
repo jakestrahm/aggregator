@@ -1,21 +1,21 @@
 import { sql } from '../db/db';
-import { ItemInsert, ItemSelect, ItemUpdate } from '../types';
+import { ItemInsert, ItemUpdate } from '../types';
 import { DbError, DbErrorType } from '../utilities/DbError';
 
 const selectItemById = async (id: number) => {
 	try {
 		const items = await sql`
-      select
-        i.id as item_id,
-        i.name,
-        i.item_type,
-        coalesce(jsonb_object_agg(ip.property_name, ip.property_value)
-          filter (where ip.property_name is not null), '{}'::jsonb) as properties
-      from items i
-      left join item_properties ip on i.id = ip.item_id
-      where i.id = ${id}
-      group by i.id;
-    `;
+		  select
+			i.id as item_id,
+			i.name,
+			i.item_type,
+			coalesce(jsonb_object_agg(ip.property_name, ip.property_value)
+			  filter (where ip.property_name is not null), '{}'::jsonb) as properties
+		  from items i
+		  left join item_properties ip on i.id = ip.item_id
+		  where i.id = ${id}
+		  group by i.id;
+		`;
 
 		if (items.length === 0) {
 			throw new DbError(`item of id: ${id} not found`, DbErrorType.MissingRecord);
@@ -118,7 +118,7 @@ const insertItem = async (itemInsert: ItemInsert) => {
 		throw err;
 	}
 };
-//todo return itemselects?
+//todo ensure all items of a item_type have the same item_properties
 
 const updateItemById = async (id: number, itemUpdate: ItemUpdate) => {
 	try {

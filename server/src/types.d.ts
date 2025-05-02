@@ -37,12 +37,6 @@ type ItemInsert = {
 	properties?: { property_name: string; property_value: string }[];
 };
 
-type ItemSelect = {
-	id: number;
-	name: string;
-	item_type: string;
-	properties?: { property_name: string; property_value: string }[];
-};
 
 // item properties
 type ItemPropertyInsert = {
@@ -102,7 +96,6 @@ export {
 	UserSelect,
 	ItemUpdate,
 	ItemInsert,
-	ItemSelect,
 	ItemPropertyInsert,
 	ItemPropertySelect,
 	ItemPropertyUpdate,

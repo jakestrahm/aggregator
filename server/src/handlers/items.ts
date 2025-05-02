@@ -43,8 +43,9 @@ const removeItem = asyncHandler(async (req: Request, res: Response) => {
 const editItem = asyncHandler(async (req: Request, res: Response) => {
 	const update: ItemUpdate = {};
 	const { name, item_type, ...propertyFields } = req.body;
+	const id = parseInt(req.params.id);
 
-	// Handle direct fields
+	// handle direct fields
 	if (name) {
 		update.name = name;
 	}
@@ -52,9 +53,9 @@ const editItem = asyncHandler(async (req: Request, res: Response) => {
 		update.item_type = item_type;
 	}
 
-	// Handle properties - now we use propertyFields directly
+	// handle properties
 	if (Object.keys(propertyFields).length > 0) {
-		// Each field in propertyFields becomes a property
+		// each field in propertyfields becomes a property
 		update.properties = Object.entries(propertyFields).map(([name, value]) => ({
 			property_name: name,
 			property_value: String(value)
@@ -65,25 +66,12 @@ const editItem = asyncHandler(async (req: Request, res: Response) => {
 		throw new ResponseError('no fields to update', 400);
 	}
 
-	const result = await updateItemById(parseInt(req.params.id), update);
+	const result = await updateItemById(id, update);
 	console.log(result);
 	res.json(result);
 });
 
 const createItem = asyncHandler(async (req: Request, res: Response) => {
-	//todo
-	// const validEmail = req.body?.email && validator.isEmail(req.body.email)
-	// const validItemname = req.body?.itemname && validator.isLength(req.body.itemname, { min: 3, max: 20 })
-	// const validPassword = req.body?.password && validator.isStrongPassword(req.body.password)
-
-	// if (!validEmail) {
-	// 	throw new ResponseError(`invalid email`, 400)
-	// } else if (!validItemname) {
-	// 	throw new ResponseError(`invalid itemname`, 400)
-	// } else if (!validPassword) {
-	// 	throw new ResponseError(`invalid password`, 400)
-	// }
-
 	let newItem: ItemInsert = {
 		name: req.body.name,
 		item_type: req.body.item_type,
