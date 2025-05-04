@@ -1,10 +1,10 @@
 import { useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../../redux/hooks";
 import { LoginResponse, useLoginMutation } from "../../redux/services/auth";
 import { setCredentials } from "../../redux/slices/authSlice";
 
 export default function LoginUser() {
-	const dispatch = useDispatch();
+	const dispatch = useAppDispatch();
 	const { register, handleSubmit } = useForm();
 	const [Login] = useLoginMutation();
 

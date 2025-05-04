@@ -1,10 +1,8 @@
 import { useForm } from "react-hook-form";
-// import { useRegisterMutation, User } from "../../redux/services/users";
 
 export default function EditUser({ setData, userId }: any) {
 	const { register, handleSubmit } = useForm();
-	// todo replace with edituser
-	// const [RegisterUser] = useRegisterMutation();
+
 
 	async function submitForm(data: any) {
 		try {
