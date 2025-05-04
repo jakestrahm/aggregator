@@ -1,19 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+// def for slice's state shape
 export interface ProfilingState {
 	status: 'enabled' | 'disabled'
 	data: object | null
 
 };
 
-const initialState: ProfilingState = {
-	status: 'disabled',
-	data: null
-};
-
 export const profilingSlice = createSlice({
+	//slice name- prefix for actions e.g. profiling/enableProfiling
 	name: 'profiling',
-	initialState,
+	initialState: { status: 'disabled', data: null } as ProfilingState,
+
 	reducers: {
 		enableProfiling: state => {
 			state.status = 'enabled'
