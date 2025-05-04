@@ -1,12 +1,12 @@
 import { useForm } from "react-hook-form";
 import { useRegisterMutation, User } from "../../redux/services/users";
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../../redux/hooks";
 import { setProfilingData } from "../../redux/slices/profilingSlice";
 
 export default function RegisterUser({ setData }: any) {
 	const { register, handleSubmit } = useForm();
 	const [RegisterUser] = useRegisterMutation();
-	const dispatch = useDispatch();
+	const dispatch = useAppDispatch();
 
 
 	async function submitForm(data: any) {
@@ -21,9 +21,10 @@ export default function RegisterUser({ setData }: any) {
 		}
 	}
 
+	// useForm using "register" is completely coincidental
 	return (
 		<form onSubmit={handleSubmit(submitForm)}>
-			<h3>register</h3>
+			<h3>register user</h3>
 			<input
 				type="username"
 				{...register('username')}
