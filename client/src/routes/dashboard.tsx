@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import {
 	enableProfiling,
 	disableProfiling,
@@ -14,16 +14,17 @@ import EditUser from "../components/Users/EditUser";
 import RemoveUser from "../components/Users/RemoveUser";
 import FindUser from "../components/Users/FindUser";
 import Search from "../components/Search";
+import ListUsers from "../components/Users/ListUsers";
 
 export default function Dashboard() {
-	const dispatch = useDispatch();
-	const profilingStatus = useSelector(selectProfilingStatus);
-	const profile = useSelector(selectProfilingData);
+	const dispatch = useAppDispatch();
+	const profilingStatus = useAppSelector(selectProfilingStatus);
+	const profile = useAppSelector(selectProfilingData);
 	const [data, setData] = useState({});
 	const [activeForm, setActiveForm] = useState('');
 	const [searchText, setSearchText] = useState("");
 
-	const buttons = ['Register User', 'Edit User', 'Remove User', 'Find User', 'Select All Users'];
+	const buttons = ['Register User', 'Edit User', 'Remove User', 'Find User', 'List Users'];
 
 	const filteredButtons = buttons.filter(button =>
 		button.toLowerCase().includes(searchText.toLowerCase())
@@ -43,6 +44,8 @@ export default function Dashboard() {
 				return <RemoveUser setData={setData} />;
 			case 'Find User':
 				return <FindUser setData={setData} />;
+			case 'List Users':
+				return <ListUsers />;
 			default:
 				return null;
 		}
