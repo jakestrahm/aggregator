@@ -69,6 +69,7 @@ const editUser = asyncHandler(async (req: Request, res: Response) => {
 		}
 	}
 
+	// TODO why would i need either, shouldn't i just to do this by id and protect the route?
 	if (!username && !email) {
 		throw new ResponseError('provide either email or username', 401)
 	}
@@ -94,6 +95,8 @@ const register = asyncHandler(async (req: Request, res: Response) => {
 	const validEmail = req.body?.email && validator.isEmail(req.body.email)
 	const validUsername = req.body?.username && validator.isLength(req.body.username, { min: 3, max: 20 })
 	const validPassword = req.body?.password && validator.isStrongPassword(req.body.password)
+	console.log(req.body)
+	console.log(req.body.password)
 
 	if (!validEmail) {
 		throw new ResponseError(`invalid email`, 400)

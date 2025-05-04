@@ -1,8 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "./baseQuery";
-//todo get in codegen rtk query
-//learn about tags + caching
-//using tags to automatically refresh
 
 export interface LoginResponse {
 	user: object
@@ -15,9 +12,16 @@ export interface LoginRequest {
 }
 
 export const authApi = createApi({
+	//api name- prefix in path www.x.com/authApi/login
 	reducerPath: 'authApi',
+
+	//includes base url e.g. www.x.com
 	baseQuery,
+
+	//define the endpoints for this path authApi/login, authApi/x, etc
 	endpoints: (builder) => ({
+
+		//mutation for operations other than reads
 		login: builder.mutation<LoginResponse, LoginRequest>({
 			query: (credentials) => ({
 				url: 'users/login',
@@ -25,6 +29,7 @@ export const authApi = createApi({
 				body: credentials
 			}),
 		}),
+		//TODO should this be middleware?
 		protected: builder.mutation<{ message: string }, void>({
 			query: () => 'protected'
 		})

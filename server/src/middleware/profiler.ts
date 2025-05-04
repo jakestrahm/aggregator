@@ -4,7 +4,7 @@ import { asyncHandler } from './asyncHandler';
 
 export const profiler = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
 
-	const profilingEnabled = req.header('Profile-Request') === 'true'
+	const profilingEnabled = false && req.header('Profile-Request') === 'true'
 	if (!profilingEnabled) {
 		next();
 		return;
@@ -24,7 +24,7 @@ export const profiler = asyncHandler(async (req: Request, res: Response, next: N
 				console.error('Profiling error:', err);
 			} else {
 				// include the profile data in the response
-				body = { data: body, profile: profile };
+				body = { ...body, profilingData: profile };
 			}
 			session.disconnect();
 			originalJson.call(this, body);
