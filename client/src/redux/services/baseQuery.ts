@@ -1,5 +1,6 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
+
 export const baseQuery = fetchBaseQuery({
 	baseUrl: 'http://localhost:3000/',
 	prepareHeaders: (headers, { getState }) => {
