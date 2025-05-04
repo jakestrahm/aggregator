@@ -38,6 +38,11 @@ type ItemInsert = {
 };
 
 
+type Property = {
+	property_name: string
+	property_value: string
+}
+
 // item properties
 type ItemPropertyInsert = {
 	item_id: number
@@ -94,6 +99,7 @@ export {
 	UserInsert,
 	UserAuthenticate,
 	UserSelect,
+	Property,
 	ItemUpdate,
 	ItemInsert,
 	ItemPropertyInsert,
