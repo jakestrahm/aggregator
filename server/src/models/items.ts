@@ -118,8 +118,6 @@ const insertItem = async (itemInsert: ItemInsert) => {
 		throw err;
 	}
 };
-//todo ensure all items of a item_type have the same item_properties
-
 const updateItemById = async (id: number, itemUpdate: ItemUpdate) => {
 	try {
 		const existingItem = await selectItemById(id);
@@ -127,9 +125,9 @@ const updateItemById = async (id: number, itemUpdate: ItemUpdate) => {
 			throw new DbError(`item of id: ${id} not found`, DbErrorType.MissingRecord);
 		}
 		const {
-			name = existingItem.name,
-			item_type = existingItem.item_type,
-			properties = existingItem.properties,
+			name = itemUpdate.name || existingItem.name,
+			item_type = itemUpdate.item_type || existingItem.item_type,
+			properties = existingItem.properties
 		} = itemUpdate;
 
 		return await sql.begin(async (sql) => {
@@ -139,6 +137,7 @@ const updateItemById = async (id: number, itemUpdate: ItemUpdate) => {
 				set
 					name = ${name},
 					item_type = ${item_type}
+					where id = ${id}
 					returning id;`
 
 			if (updatedItem.length == 0) {

@@ -8,7 +8,7 @@ import {
 	insertItem,
 	updateItemById,
 } from '../models/items';
-import { ItemInsert, ItemUpdate } from '../types';
+import { ItemInsert, ItemUpdate, Property } from '../types';
 
 const listItems = asyncHandler(async (_: Request, res: Response) => {
 	let result = await selectItems()
@@ -42,24 +42,19 @@ const removeItem = asyncHandler(async (req: Request, res: Response) => {
 
 const editItem = asyncHandler(async (req: Request, res: Response) => {
 	const update: ItemUpdate = {};
-	const { name, item_type, ...propertyFields } = req.body;
+	const { name, item_type, properties } = req.body;
 	const id = parseInt(req.params.id);
 
-	// handle direct fields
 	if (name) {
 		update.name = name;
 	}
+
 	if (item_type) {
 		update.item_type = item_type;
 	}
 
-	// handle properties
-	if (Object.keys(propertyFields).length > 0) {
-		// each field in propertyfields becomes a property
-		update.properties = Object.entries(propertyFields).map(([name, value]) => ({
-			property_name: name,
-			property_value: String(value)
-		}));
+	if (Array.isArray(properties) && properties.length > 0) {
+		update.properties = properties
 	}
 
 	if (!name && !item_type && !update.properties?.length) {
