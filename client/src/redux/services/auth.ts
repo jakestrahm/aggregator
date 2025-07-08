@@ -1,5 +1,4 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQuery } from "./baseQuery";
+import { baseApi } from "./baseApi";
 
 export interface LoginResponse {
 	user: object
@@ -11,13 +10,7 @@ export interface LoginRequest {
 	password: string
 }
 
-export const authApi = createApi({
-	//api name- prefix in path www.x.com/authApi/login
-	reducerPath: 'authApi',
-
-	//includes base url e.g. www.x.com
-	baseQuery,
-
+export const authApi = baseApi.injectEndpoints({
 	//define the endpoints for this path authApi/login, authApi/x, etc
 	endpoints: (builder) => ({
 

@@ -47,7 +47,6 @@ const editUser = asyncHandler(async (req: Request, res: Response) => {
 	const update: UserUpdate = {}
 	const email: string = req.body?.email
 	const username: string = req.body?.username
-	const password: string = req.body?.password
 
 	if (email) {
 		const validEmail = validator.isEmail(email)
@@ -73,19 +72,6 @@ const editUser = asyncHandler(async (req: Request, res: Response) => {
 	if (!username && !email) {
 		throw new ResponseError('provide either email or username', 401)
 	}
-
-	if (password) {
-		const validpassword = validator.isStrongPassword(req.body.password)
-
-		if (validpassword) {
-			update.password = req.body.password
-		} else {
-			throw new ResponseError(`invalid password`, 400)
-		}
-	} else {
-		throw new ResponseError('missing password', 401)
-	}
-
 	const result = await updateUserById(parseInt(req.params.id), update)
 	console.log(result)
 	res.json(result);
@@ -95,8 +81,6 @@ const register = asyncHandler(async (req: Request, res: Response) => {
 	const validEmail = req.body?.email && validator.isEmail(req.body.email)
 	const validUsername = req.body?.username && validator.isLength(req.body.username, { min: 3, max: 20 })
 	const validPassword = req.body?.password && validator.isStrongPassword(req.body.password)
-	console.log(req.body)
-	console.log(req.body.password)
 
 	if (!validEmail) {
 		throw new ResponseError(`invalid email`, 400)

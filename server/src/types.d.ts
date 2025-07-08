@@ -23,6 +23,13 @@ type UserSelect = {
 	username: string
 	created_at: string
 }
+type AuthenticatedUserSelect = {
+	id: number
+	email: string
+	username: string
+	created_at: string,
+	password_hash: string
+}
 
 // items
 type ItemUpdate = {

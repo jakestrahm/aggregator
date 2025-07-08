@@ -96,27 +96,27 @@ const insertUser = async (userInsert: UserInsert) => {
 
 const updateUserById = async (id: number, userUpdate: UserUpdate) => {
 	try {
-		const { username, email } = userUpdate;
 
-		let setStatement = ``;
+		const userToEdit = await selectUserById(id);
 
-		switch (userUpdate) {
-			case userUpdate.email && userUpdate.username:
-				setStatement = `set username= ${username}, email=${email}`
-				break;
-			case userUpdate.email:
-				setStatement = `set email=${email}`
-				break;
-			case userUpdate.username:
-				setStatement = `set username=${username}`
-				break;
+		if (selectUserById.length == 0) {
+			throw new DbError(`user of id ${id} not found`, DbErrorType.MissingRecord)
 		}
 
-		await selectUserById(id);
+		//weird destructuring syntax, think of default values for function
+		//if they're provided the defaults are ignored. same here, if userUpdate
+		//has values for username it will use it instead of getting it from 
+		//userToEdit
+		const {
+			username = userToEdit.username,
+			email = userToEdit.email,
+		} = userUpdate;
 
 		const updateUser = await sql`
 		update users
-		${setStatement}
+		set 
+			username = ${username}, 
+			email = ${email}
 		where id = ${id}
 		returning id, username, email, created_at`
 
@@ -124,7 +124,7 @@ const updateUserById = async (id: number, userUpdate: UserUpdate) => {
 			throw new DbError(`updating user of id: ${id} failed`, DbErrorType.ServerError)
 		}
 
-		return updateUser;
+		return updateUser[0];
 	} catch (err) {
 		console.error(err);
 		throw err;

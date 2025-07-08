@@ -1,5 +1,4 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQuery } from "./baseQuery";
+import { baseApi } from "./baseApi";
 
 export interface User {
 	id: number,
@@ -17,13 +16,9 @@ export interface UserInsert {
 export interface UserUpdate {
 	username?: string
 	email?: string
-	password?: string
 }
 
-export const userApi = createApi({
-	reducerPath: 'users',
-	baseQuery,
-	tagTypes: ['User'],
+export const userApi = baseApi.injectEndpoints({
 
 	endpoints: (builder) => ({
 
@@ -42,7 +37,7 @@ export const userApi = createApi({
 
 		}),
 
-		listUsers: builder.query<User[], null>({
+		listUsers: builder.query<User[], void>({
 			query: () => ({
 				url: 'users',
 				method: 'GET'
@@ -57,7 +52,10 @@ export const userApi = createApi({
 			query: (data) => ({
 				url: `users/${data.id}`,
 				method: 'PUT',
-				body: { email: data.email, username: data.username, password: data.password }
+				body: {
+					email: data?.email,
+					username: data?.username,
+				}
 			}),
 			invalidatesTags: (result, error, arg) => [{ type: 'User', id: arg.id }]
 
