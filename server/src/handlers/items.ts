@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '../middleware/asyncHandler';
-import { ResponseError } from '../utilities/ResponseError';
+import { ResponseError } from '../utils/ResponseError';
 import {
 	selectItemById,
 	selectItems,
@@ -9,10 +9,11 @@ import {
 	updateItemById,
 } from '../models/items';
 import { ItemInsert, ItemUpdate, Property } from '../types';
+import { logger } from "../utils/logger"
 
 const listItems = asyncHandler(async (_: Request, res: Response) => {
 	let result = await selectItems()
-	console.log(result);
+	logger.info('list items', result)
 	res.json(result);
 });
 
@@ -24,7 +25,7 @@ const findItem = asyncHandler(async (req: Request, res: Response) => {
 	}
 
 	let result = await selectItemById(id)
-	console.log(result)
+	logger.info('find item', result)
 	res.json(result)
 });
 

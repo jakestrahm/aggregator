@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { sql } from '../db/db';
 import { UserAuthenticate, UserInsert, UserSelect, UserUpdate } from '../types';
-import { DbError, DbErrorType } from '../utilities/DbError';
+import { DbError, DbErrorType } from '../utils/DbError';
 dotenv.config()
 
 const JWT_SECRET = process.env.JWT_SECRET || 'backup-secret';
