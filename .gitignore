@@ -19,6 +19,7 @@ build
 
 # logs
 npm-debug.log*
+logs/
 
 # docker
 docker-compose.override.yml

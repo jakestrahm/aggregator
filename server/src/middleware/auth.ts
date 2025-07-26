@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { asyncHandler } from './asyncHandler';
 import { sql } from '../db/db';
-import { ResponseError } from '../utilities/ResponseError';
+import { ResponseError } from '../utils/ResponseError';
 const protect = (asyncHandler(async (req: Request, _: Response, next: NextFunction) => {
 	const token = req.headers.authorization
 	console.log({ token })

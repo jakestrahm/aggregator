@@ -2,7 +2,7 @@ import validator from 'validator';
 import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import { asyncHandler } from '../middleware/asyncHandler';
-import { ResponseError } from '../utilities/ResponseError';
+import { ResponseError } from '../utils/ResponseError';
 import { UserAuthenticate, UserInsert, UserUpdate } from '../types';
 import {
 	selectUserById,

@@ -1,6 +1,6 @@
 import { sql } from '../db/db';
 import { ItemInsert, ItemUpdate } from '../types';
-import { DbError, DbErrorType } from '../utilities/DbError';
+import { DbError, DbErrorType } from '../utils/DbError';
 
 const selectItemById = async (id: number) => {
 	try {

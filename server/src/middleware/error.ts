@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { ResponseError } from '../utilities/ResponseError';
-import { DbError, DbErrorType } from '../utilities/DbError';
+import { ResponseError } from '../utils/ResponseError';
+import { DbError, DbErrorType } from '../utils/DbError';
 
 const errorHandler = (err: Error, _: Request, res: Response, __: NextFunction) => {
 	console.error(err)
