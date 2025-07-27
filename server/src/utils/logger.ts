@@ -2,10 +2,25 @@ import winston from "winston";
 
 const logLevel = process.env.LOG_LEVEL || 'info';
 
+const logFormat = winston.format.combine(
+	winston.format.timestamp(),
+	winston.format.errors({ stack: true }),
+	winston.format.json(),
+	winston.format.printf(({ timestamp, level, message, correlationId, ...meta }) => {
+		return JSON.stringify({
+			timestamp,
+			level,
+			message,
+			correlationId,
+			...meta
+		});
+	})
+);
+
 const logger = winston.createLogger({
 	level: logLevel,
-	format: winston.format.json(),
-	defaultMeta: { service: 'user-service' },
+	format: logFormat,
+	defaultMeta: { service: 'howdy-service' },
 	transports: [
 		new winston.transports.File({
 			filename: 'logs/error.log',

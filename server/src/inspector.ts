@@ -1,8 +1,5 @@
 import * as inspector from 'node:inspector/promises';
 
-//todo might be deprecated
-
-// export async function startCpuProfiling(): Promise<inspector.Profiler.Profile> {
 export async function startCpuProfiling() {
 	const session = new inspector.Session();
 	session.connect();
